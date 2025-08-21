@@ -1,0 +1,29 @@
+#include <stdio.h>
+
+
+int main()
+{
+int n, a=0,b=1,next,i;
+
+    printf("enter a number of terms:");
+    scanf("%d",&n);
+
+    if(num <= 0)
+        printf("please enter a positive number.");
+        else if (n==1)
+            printf("%d",a);
+    else {
+            printf("Fibonacci Series:%d %d", a, b);
+            for (i=3; i <=n; i++){
+                   next = a+b;
+                   printf("%d", next);
+                   a = b;
+                   b = next;
+            }
+            
+
+    }
+
+
+    return 0;
+}
