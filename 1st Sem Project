@@ -1,0 +1,143 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX 50   // Maximum parking slots
+
+struct Vehicle {
+    char number[20];
+    char type[10];
+    int hours;
+    int charge;
+};
+
+struct Vehicle parking[MAX];
+int count = 0;
+
+// Function to calculate charge
+int calculateCharge(char type[], int hours) {
+    if (strcmp(type, "Car") == 0 || strcmp(type, "car") == 0)
+        return hours * 50;   // ₹50 per hour for cars
+    else
+        return hours * 20;   // ₹20 per hour for bikes
+}
+
+// Function to park a new vehicle
+void parkVehicle() {
+    if (count >= MAX) {
+        printf("\nParking Full! Cannot park more vehicles.\n");
+        return;
+    }
+    printf("\nEnter Vehicle Number: ");
+    scanf("%s", parking[count].number);
+    printf("Enter Vehicle Type (Car/Bike): ");
+    scanf("%s", parking[count].type);
+    printf("Enter Hours Parked: ");
+    scanf("%d", &parking[count].hours);
+
+    parking[count].charge = calculateCharge(parking[count].type, parking[count].hours);
+
+    printf("✅ Vehicle Parked Successfully! Charge = %d\n", parking[count].charge);
+    count++;
+}
+
+// Function to display all parked vehicles
+void displayStatus() {
+    if (count == 0) {
+        printf("\nNo vehicles parked yet.\n");
+        return;
+    }
+    printf("\n--- Parking Status ---\n");
+    printf("No. | Vehicle No. | Type | Hours | Charge\n");
+    printf("---------------------------------------------\n");
+    for (int i = 0; i < count; i++) {
+        printf("%d   | %s | %s | %d | %d\n",
+               i + 1, parking[i].number, parking[i].type, parking[i].hours, parking[i].charge);
+    }
+}
+
+// Function to remove a vehicle
+void removeVehicle() {
+    if (count == 0) {
+        printf("\nNo vehicles to remove.\n");
+        return;
+    }
+    char num[20];
+    printf("\nEnter Vehicle Number to remove: ");
+    scanf("%s", num);
+
+    int found = -1;
+    for (int i = 0; i < count; i++) {
+        if (strcmp(parking[i].number, num) == 0) {
+            found = i;
+            break;
+        }
+    }
+
+    if (found == -1) {
+        printf("❌ Vehicle not found!\n");
+        return;
+    }
+
+    printf("✅ Vehicle %s removed. Total Charge = %d\n", parking[found].number, parking[found].charge);
+
+    // Shift remaining vehicles
+    for (int i = found; i < count - 1; i++) {
+        parking[i] = parking[i + 1];
+    }
+    count--;
+}
+
+// Function to save data to file
+void saveToFile() {
+    FILE *fp = fopen("parking_records.txt", "w");
+    if (fp == NULL) {
+        printf("Error saving file!\n");
+        return;
+    }
+    for (int i = 0; i < count; i++) {
+        fprintf(fp, "%s %s %d %d\n", parking[i].number, parking[i].type,
+                parking[i].hours, parking[i].charge);
+    }
+    fclose(fp);
+    printf("✅ Records saved to file successfully!\n");
+}
+
+// Function to load data from file
+void loadFromFile() {
+    FILE *fp = fopen("parking_records.txt", "r");
+    if (fp == NULL) {
+        return; // no file yet
+    }
+    while (fscanf(fp, "%s %s %d %d",
+                  parking[count].number, parking[count].type,
+                  &parking[count].hours, &parking[count].charge) != EOF) {
+        count++;
+    }
+    fclose(fp);
+}
+
+int main() {
+    int choice;
+    loadFromFile(); // load existing records if any
+
+    do {
+        printf("\n==== Parking Management System ====\n");
+        printf("1. Park Vehicle\n");
+        printf("2. Remove Vehicle\n");
+        printf("3. Display Parking Status\n");
+        printf("4. Save & Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: parkVehicle(); break;
+            case 2: removeVehicle(); break;
+            case 3: displayStatus(); break;
+            case 4: saveToFile(); printf("Exiting... Goodbye!\n"); break;
+            default: printf("Invalid choice! Try again.\n");
+        }
+    } while (choice != 4);
+
+    return 0;
+}
